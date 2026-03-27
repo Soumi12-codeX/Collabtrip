@@ -22,7 +22,7 @@ function Group() {
         }
       });
     }
-    catch(error){
+    catch (error) {
       alert("Backend error : could not create room");
       console.error(error);
     }
@@ -32,8 +32,15 @@ function Group() {
     if (!joinName.trim() || !roomCode.trim()) return alert("Please enter both your name and the room code.");
     try {
       const response = await getRoomDetails(roomCode.trim());
+      // Check if the person joining is the one who created it
       const isUserAdmin = response.data.adminName === joinName.trim();
-      navigate(`/room/${roomCode.trim()}`, { state: { isAdmin: isUserAdmin, userName: joinName.trim() } });
+
+      navigate(`/room/${roomCode.trim()}`, {
+        state: {
+          isAdmin: isUserAdmin, // Use the calculated boolean here
+          userName: joinName.trim()
+        }
+      });
     } catch (err) {
       alert("Room not found!");
     }

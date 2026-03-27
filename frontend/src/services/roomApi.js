@@ -8,10 +8,10 @@ const API = axios.create({
 export const createRoom = async (code, adminName, travelDate) => {
   return API.post(`/create`, null, {
     params : {
-    roomCode: code,
-    adminName: adminName,
+    code: code,
+    admin: adminName,
     travelDate: travelDate
-    } // Ensure this matches the field name in your Java Room class
+    } 
   });
 };
 export const savePreferences = (roomCode, prefData) => API.post(`/${roomCode}/preferences`, prefData);
