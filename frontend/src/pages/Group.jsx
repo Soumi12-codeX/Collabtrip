@@ -1,23 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { createRoom, getRoomDetails } from "../services/roomApi";
 
 function Group() {
   const [roomCode, setRoomCode] = useState("");
   const [createName, setCreateName] = useState("");
   const [joinName, setJoinName] = useState("");
   const navigate = useNavigate();
+  const [travelDate, setTravelDate] = useState("");
 
-  const handleCreateRoom = () => {
-    if (!createName.trim()) return alert("Please enter your name to create a room.");
+  const handleCreateRoom = async () => {
+    if (!createName.trim() || !travelDate) return alert("Please enter your name to create a room.");
     // Generate a random 6-digit room code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    navigate(`/room/${code}`, { state: { isAdmin: true, userName: createName.trim() } });
+    try {
+      await createRoom(code, createName.trim(), travelDate);
+      navigate(`/room/${code}`, {
+        state: {
+          isAdmin: true, userName: createName.trim()
+        }
+      });
+    }
+    catch(error){
+      alert("Backend error : could not create room");
+      console.error(error);
+    }
   };
 
-  const handleJoinRoom = () => {
+  const handleJoinRoom = async () => {
     if (!joinName.trim() || !roomCode.trim()) return alert("Please enter both your name and the room code.");
-    navigate(`/room/${roomCode.trim()}`, { state: { isAdmin: false, userName: joinName.trim() } });
+    try {
+      const response = await getRoomDetails(roomCode.trim());
+      const isUserAdmin = response.data.adminName === joinName.trim();
+      navigate(`/room/${roomCode.trim()}`, { state: { isAdmin: isUserAdmin, userName: joinName.trim() } });
+    } catch (err) {
+      alert("Room not found!");
+    }
   };
 
   return (
@@ -30,7 +49,7 @@ function Group() {
       <div className="w-full max-w-6xl grid md:grid-cols-2 gap-12 relative z-10">
 
         {/* CREATE ROOM */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -53,9 +72,15 @@ function Group() {
               placeholder="Your Name"
               className="w-full p-5 rounded-2xl bg-slate-50 border border-black/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-900 placeholder-slate-400 outline-none text-lg transition-all"
             />
+            <input
+              type="date"
+              value={travelDate}
+              onChange={(e) => setTravelDate(e.target.value)}
+              className="w-full mt-4 p-5 rounded-2xl bg-slate-50 border border-black/10 text-slate-900 outline-none text-lg transition-all"
+            />
           </div>
 
-          <button 
+          <button
             onClick={handleCreateRoom}
             className="mt-10 overflow-hidden relative group bg-blue-600 text-white p-5 rounded-2xl font-semibold shadow-[0_10px_30px_rgba(37,99,235,0.3)] hover:bg-blue-500 hover:shadow-[0_15px_40px_rgba(37,99,235,0.5)] transition-all"
           >
@@ -66,7 +91,7 @@ function Group() {
         </motion.div>
 
         {/* JOIN ROOM */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
@@ -99,7 +124,7 @@ function Group() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={handleJoinRoom}
             className="mt-10 overflow-hidden relative group bg-slate-100 hover:bg-slate-200 border border-black/5 text-slate-900 p-5 rounded-2xl font-bold tracking-wide shadow-sm hover:shadow-md transition-all"
           >

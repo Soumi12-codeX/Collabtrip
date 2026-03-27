@@ -1,6 +1,11 @@
+package com.collabtrip.backend.model;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,9 +21,11 @@ public class UserPreference {
     private Integer budgetLimit;
     private Integer availableDays;
     private String preferredStyle; //Comfort, luxury, budget
+    private String transportType;
 
     @ManyToOne
     @JoinColumn(name = "room_id")
+    @JsonIgnore
     private TripRoom tripRoom;
 
     public Long getId(){
@@ -56,5 +63,11 @@ public class UserPreference {
     }
     public void setTripRoom(TripRoom tripRoom){
         this.tripRoom = tripRoom;
+    }
+    public String getTransportType(){
+        return transportType;
+    }
+    public void setTransportType(String transportType){
+        this.transportType = transportType;
     }
 }
